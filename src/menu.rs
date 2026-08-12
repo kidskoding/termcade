@@ -6,29 +6,21 @@ use ratatui::widgets::ListState;
 use crate::games::{self, GAMES};
 use crate::render;
 
-pub struct App {
+pub struct Menu {
     pub selected: usize,
     pub list_state: ListState,
     pub error: Option<String>,
     pub started: Instant,
 }
 
-impl App {
+impl Menu {
     pub fn new() -> Self {
-        let mut list_state = ListState::default();
-        list_state.select(Some(0));
-
-        Self {
-            selected: 0,
-            list_state,
-            error: None,
-            started: Instant::now(),
-        }
+        Self::default()
     }
 
     pub fn run(&mut self, terminal: &mut ratatui::DefaultTerminal) -> color_eyre::Result<()> {
         loop {
-            terminal.draw(|frame| render::ui(self, frame))?;
+            terminal.draw(|frame| render::draw(self, frame))?;
 
             if let Some(code) = read_key()? {
                 match code {
@@ -58,6 +50,20 @@ impl App {
         *terminal = ratatui::init();
 
         Ok(())
+    }
+}
+
+impl Default for Menu {
+    fn default() -> Self {
+        let mut list_state = ListState::default();
+        list_state.select(Some(0));
+
+        Self {
+            selected: 0,
+            list_state,
+            error: None,
+            started: Instant::now(),
+        }
     }
 }
 

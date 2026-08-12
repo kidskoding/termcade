@@ -4,7 +4,7 @@ use ratatui::widgets::{Block, Clear, HighlightSpacing, List, ListItem, Paragraph
 use crate::colors::{ACCENT, CHROME, GO, LOGO_COLORS, SUBTLE, bold, chrome};
 use crate::game::Game;
 use crate::games::{self, GAMES};
-use crate::menu::App;
+use crate::menu::Menu;
 
 const LOGO: &[&str] = &[
     "█████ █████ ██████ █   █ █████  ███  ████  █████",
@@ -20,7 +20,7 @@ const TAGLINE: &str =
 const MIN_W: u16 = 46;
 const MIN_H: u16 = 18;
 
-pub fn ui(app: &mut App, frame: &mut Frame) {
+pub fn draw(menu: &mut Menu, frame: &mut Frame) {
     let area = frame.area();
     if area.width < MIN_W || area.height < MIN_H {
         let msg = Paragraph::new(format!("needs at least {MIN_W}×{MIN_H}"))
@@ -30,7 +30,7 @@ pub fn ui(app: &mut App, frame: &mut Frame) {
         return;
     }
 
-    let blink_on = app.started.elapsed().as_millis() % 1000 < 500;
+    let blink_on = menu.started.elapsed().as_millis() % 1000 < 500;
     let [_, top, _, tagline, body, footer] = Layout::vertical([
         Constraint::Length(1),
         Constraint::Length(LOGO.len() as u16),
@@ -43,7 +43,7 @@ pub fn ui(app: &mut App, frame: &mut Frame) {
 
     draw_logo(frame, top);
     draw_tagline(frame, tagline);
-    draw_panels(app, frame, body, blink_on);
+    draw_panels(menu, frame, body, blink_on);
     draw_footer(frame, footer);
 }
 
@@ -66,19 +66,19 @@ fn draw_tagline(frame: &mut Frame, area: Rect) {
     frame.render_widget(tagline, area);
 }
 
-fn draw_panels(app: &mut App, frame: &mut Frame, area: Rect, blink_on: bool) {
+fn draw_panels(menu: &mut Menu, frame: &mut Frame, area: Rect, blink_on: bool) {
     let [left, right] =
         Layout::horizontal([Constraint::Length(26), Constraint::Min(1)]).areas::<2>(area);
 
-    draw_game_list(app, frame, left);
-    draw_detail(app, frame, right, blink_on);
+    draw_game_list(menu, frame, left);
+    draw_detail(menu, frame, right, blink_on);
 
-    if let Some(message) = &app.error {
+    if let Some(message) = &menu.error {
         draw_error(frame, area, message);
     }
 }
 
-fn draw_game_list(app: &mut App, frame: &mut Frame, area: Rect) {
+fn draw_game_list(menu: &mut Menu, frame: &mut Frame, area: Rect) {
     let items: Vec<ListItem> = GAMES.iter().map(game_item).collect();
     let list = List::new(items)
         .highlight_symbol("▶ ")
@@ -90,7 +90,7 @@ fn draw_game_list(app: &mut App, frame: &mut Frame, area: Rect) {
                 .title(Span::styled(" GAMES ", bold(ACCENT))),
         );
 
-    frame.render_stateful_widget(list, area, &mut app.list_state);
+    frame.render_stateful_widget(list, area, &mut menu.list_state);
 }
 
 fn game_item(game: &Game) -> ListItem<'_> {
@@ -107,8 +107,8 @@ fn game_item(game: &Game) -> ListItem<'_> {
     ListItem::new(Line::styled(text, style))
 }
 
-fn draw_detail(app: &mut App, frame: &mut Frame, area: Rect, blink_on: bool) {
-    let game = &GAMES[app.selected];
+fn draw_detail(menu: &mut Menu, frame: &mut Frame, area: Rect, blink_on: bool) {
+    let game = &GAMES[menu.selected];
     let built = games::available(game);
     let main_color = if built { ACCENT } else { CHROME };
 
