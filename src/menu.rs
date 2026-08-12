@@ -1,4 +1,4 @@
-use std::time::Duration;
+use std::time::{Duration, Instant};
 
 use crossterm::event::{self, Event, KeyCode, KeyEventKind};
 use ratatui::widgets::ListState;
@@ -10,6 +10,7 @@ pub struct App {
     pub selected: usize,
     pub list_state: ListState,
     pub error: Option<String>,
+    pub started: Instant,
 }
 
 impl App {
@@ -21,6 +22,7 @@ impl App {
             selected: 0,
             list_state,
             error: None,
+            started: Instant::now(),
         }
     }
 

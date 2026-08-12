@@ -5,12 +5,16 @@ use color_eyre::eyre::{Result, bail};
 
 pub struct Game {
     pub name: &'static str,
+    pub blurb: &'static str,
     pub bin: &'static str,
+    pub hint: &'static str,
 }
 
 pub const GAMES: &[Game] = &[Game {
     name: "Tetris",
+    blurb: "stack falling bricks into lines",
     bin: "tetris",
+    hint: "controls still under construction",
 }];
 
 pub fn available(game: &Game) -> bool {
