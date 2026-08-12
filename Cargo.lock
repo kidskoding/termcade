@@ -1515,7 +1515,9 @@ dependencies = [
 name = "termcade"
 version = "0.1.0"
 dependencies = [
- "tetris",
+ "color-eyre",
+ "crossterm",
+ "ratatui",
 ]
 
 [[package]]
