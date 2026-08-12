@@ -1,23 +1,10 @@
 use ratatui::prelude::*;
 use ratatui::widgets::{Block, Clear, HighlightSpacing, List, ListItem, Paragraph, Wrap};
 
-use crate::games::{self, GAMES, Game};
+use crate::colors::{ACCENT, CHROME, GO, LOGO_COLORS, SUBTLE, bold, chrome};
+use crate::game::Game;
+use crate::games::{self, GAMES};
 use crate::menu::App;
-
-const ACCENT: Color = Color::LightRed;
-const GO: Color = Color::Green;
-const CHROME: Color = Color::DarkGray;
-const SUBTLE: Color = Color::Gray;
-
-const LOGO_COLORS: [Color; 4] = [Color::Red, Color::LightRed, Color::Yellow, Color::LightRed];
-
-fn bold(color: Color) -> Style {
-    Style::default().fg(color).add_modifier(Modifier::BOLD)
-}
-
-fn chrome() -> Style {
-    Style::default().fg(CHROME)
-}
 
 const LOGO: &[&str] = &[
     "█████ █████ ██████ █   █ █████  ███  ████  █████",
