@@ -6,4 +6,13 @@ authors = [ "Anirudh Konidala" ]
 description = "a collection of terminal arcade games to play when you are bored during that 8 am lecture"
 license = "MIT"
 
+repository = "https://github.com/kidskoding/termcade"
+
+[workspace]
+members = [
+  "games/tetris"
+]
+resolver = "2"
+
 [dependencies]
+tetris = { path = "games/tetris" }
