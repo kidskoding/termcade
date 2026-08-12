@@ -2,12 +2,14 @@ use std::path::PathBuf;
 use std::process::Command;
 
 use color_eyre::eyre::{Result, bail};
+use ratatui::prelude::Color;
 
 pub struct Game {
     pub name: &'static str,
     pub blurb: &'static str,
     pub bin: &'static str,
     pub hint: &'static str,
+    pub art: &'static [(&'static str, Color)],
 }
 
 pub const GAMES: &[Game] = &[Game {
@@ -15,6 +17,14 @@ pub const GAMES: &[Game] = &[Game {
     blurb: "stack falling bricks into lines",
     bin: "tetris",
     hint: "controls still under construction",
+    art: &[
+        ("     ███    ", Color::Magenta),
+        ("      █     ", Color::Magenta),
+        ("   ██████   ", Color::Green),
+        ("   ██  ██   ", Color::Blue),
+        ("   ██  ██   ", Color::Blue),
+        ("  ████████  ", Color::Cyan),
+    ],
 }];
 
 pub fn available(game: &Game) -> bool {

@@ -141,6 +141,8 @@ fn draw_detail(app: &mut App, frame: &mut Frame, area: Rect, blink_on: bool) {
     frame.render_widget(block, area);
 
     let mut lines = vec![Line::from("")];
+    lines.extend(playfield_lines(game, built));
+    lines.push(Line::from(""));
     lines.push(Line::styled(
         game.name.to_uppercase(),
         Style::default().fg(main_color).add_modifier(Modifier::BOLD),
@@ -154,6 +156,39 @@ fn draw_detail(app: &mut App, frame: &mut Frame, area: Rect, blink_on: bool) {
     lines.extend(status_lines(game, built, blink_on));
 
     frame.render_widget(Paragraph::new(lines).alignment(Alignment::Center), inner);
+}
+
+fn playfield_lines(game: &Game, built: bool) -> Vec<Line<'_>> {
+    let art_w = game
+        .art
+        .iter()
+        .map(|(row, _)| row.chars().count())
+        .max()
+        .unwrap_or(0);
+
+    let mut lines = vec![Line::styled(
+        format!("╔{}╗", "═".repeat(art_w)),
+        Style::default().fg(Color::DarkGray),
+    )];
+    for (row, color) in game.art {
+        let piece_style = if built {
+            Style::default().fg(*color)
+        } else {
+            Style::default().fg(Color::DarkGray)
+        };
+
+        lines.push(Line::from(vec![
+            Span::styled("║", Style::default().fg(Color::DarkGray)),
+            Span::styled(*row, piece_style),
+            Span::styled("║", Style::default().fg(Color::DarkGray)),
+        ]));
+    }
+
+    lines.push(Line::styled(
+        format!("╚{}╝", "═".repeat(art_w)),
+        Style::default().fg(Color::DarkGray),
+    ));
+    lines
 }
 
 fn status_lines(game: &Game, built: bool, blink_on: bool) -> Vec<Line<'_>> {
