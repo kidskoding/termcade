@@ -4,27 +4,21 @@ use ratatui::{Terminal, backend::Backend};
 
 use crate::game::{Cel, Game, Row};
 
-// Cabinet art is an 8x7 playfield, two columns per cell. A T piece falls into a
-// three-wide notch, locks, completes the bottom row, and the row flashes and clears.
 const T: Color = Color::Magenta;
 const J: Color = Color::Blue;
 const I: Color = Color::Cyan;
 const S: Color = Color::Green;
 const GAP: Color = Color::Reset;
 
-/// Empty row.
 const E: Row = &[("                ", GAP)];
 
-/// The falling T: nub row, then the three-wide body row.
 const NUB: Row = &[("        ", GAP), ("██", T), ("      ", GAP)];
 const BODY: Row = &[("      ", GAP), ("██████", T), ("    ", GAP)];
 
-/// The settled stack, top row to bottom row.
 const S4: Row = &[("██", J), ("              ", GAP)];
 const S5: Row = &[("████", J), ("          ", GAP), ("██", S)];
 const S6: Row = &[("██", J), ("████", I), ("      ", GAP), ("████", S)];
 
-/// Stack rows with the T overlaid as it passes through them.
 const S4_NUB: Row = &[("██", J), ("      ", GAP), ("██", T), ("      ", GAP)];
 const S4_BODY: Row = &[("██", J), ("    ", GAP), ("██████", T), ("    ", GAP)];
 const S5_NUB: Row = &[

@@ -186,7 +186,6 @@ fn draw_error(frame: &mut Frame, body: Rect, message: &str) {
     frame.render_widget(dialog, rect);
 }
 
-/// Shutter bars closing in from the top and bottom edges, `covered` rows deep.
 pub fn bars(frame: &mut Frame, covered: u16) {
     let area = frame.area();
     let covered = covered.min(area.height / 2);

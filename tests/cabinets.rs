@@ -5,8 +5,6 @@ fn row_width(row: &Row) -> usize {
     row.iter().map(|(text, _)| text.chars().count()).sum()
 }
 
-/// Ragged cels make the detail panel jitter, and `playfield_lines` sizes the
-/// border from the widest row of the current cel, so a short one shrinks the box.
 #[test]
 fn cabinet_cels_are_uniform() {
     for game in GAMES {
