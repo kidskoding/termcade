@@ -1518,6 +1518,7 @@ dependencies = [
  "color-eyre",
  "crossterm",
  "ratatui",
+ "tetris",
 ]
 
 [[package]]

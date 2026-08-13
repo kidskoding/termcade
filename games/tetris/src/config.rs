@@ -2,7 +2,7 @@ use std::fs;
 
 use serde::Deserialize;
 
-const APP_DIR: &str = "tetrotui";
+const APP_DIR: &str = "tetris";
 const CONFIG_FILE: &str = "config.toml";
 
 #[derive(Deserialize, Default)]

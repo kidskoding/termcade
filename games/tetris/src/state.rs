@@ -27,6 +27,7 @@ pub enum PieceKind {
     J,
     L,
 }
+
 impl PieceKind {
     pub fn bounding_box(&self) -> usize {
         match self {

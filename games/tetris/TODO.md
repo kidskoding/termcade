@@ -1,4 +1,4 @@
-# TODO — tetrotui
+# TODO — tetris
 
 Build in phase order. Each phase ends **playable** before starting next.
 Tune input-feel in `--release` only (debug frame times lie).

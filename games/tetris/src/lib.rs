@@ -41,7 +41,6 @@ where
         let now = Instant::now();
         let elapsed = now.duration_since(last_tick);
         let remaining = tick_interval.saturating_sub(elapsed);
-        // ponytail: reads process stdin; swap for a per-session channel when SSH lands
         let key = input::poll(remaining);
 
         terminal.draw(|frame| render::draw(&game_state, frame))?;
