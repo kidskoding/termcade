@@ -17,7 +17,7 @@ const LOGO: &[&str] = &[
 
 const TAGLINE: &str = "a redefined arcade experience for the terminal";
 
-const MIN_W: u16 = 54;
+const MIN_W: u16 = 46;
 const MIN_H: u16 = 18;
 
 pub fn fits(area: Rect) -> bool {
@@ -117,11 +117,7 @@ fn draw_detail(menu: &mut Menu, frame: &mut Frame, area: Rect, blink_on: bool) {
 
     let mut lines = vec![Line::from("")];
 
-    lines.extend(if game.tiles {
-        animations::tiles(cel)
-    } else {
-        animations::blocks(cel)
-    });
+    lines.extend(animations::blocks(cel));
     lines.push(Line::from(""));
     lines.push(Line::styled(game.name.to_uppercase(), bold(ACCENT)));
     lines.push(Line::styled(game.blurb, Style::default().fg(SUBTLE)));

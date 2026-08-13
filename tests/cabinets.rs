@@ -1,4 +1,4 @@
-use termcade::animations::{TILE_W, cel_color, tile};
+use termcade::animations::cel_color;
 use termcade::games::GAMES;
 
 #[test]
@@ -35,54 +35,41 @@ fn cabinet_cels_are_uniform() {
 }
 
 #[test]
+fn every_cabinet_is_the_same_size() {
+    let size = |game: &termcade::game::Game| {
+        let cel = game.art.first().expect("no art cels");
+        (cel.len(), cel.first().map(|row| row.chars().count()))
+    };
+
+    let first = &GAMES[0];
+    for game in GAMES {
+        assert_eq!(
+            size(game),
+            size(first),
+            "{} does not match {}'s preview size",
+            game.name,
+            first.name
+        );
+    }
+}
+
+#[test]
 fn cabinet_art_marks_are_known() {
     for game in GAMES {
         for (c, cel) in game.art.iter().enumerate() {
             for (r, row) in cel.iter().enumerate() {
                 for mark in row.chars() {
-                    if game.tiles {
-                        assert!(
-                            tile(mark).is_some(),
-                            "{}: cel {c} row {r} has unknown tile mark {mark:?}",
-                            game.name
-                        );
-                    } else {
-                        assert!(
-                            matches!(mark, '.' | 'r' | 'y' | 'g' | 'c' | 'b' | 'm' | 'w'),
-                            "{}: cel {c} row {r} has unknown mark {mark:?}",
-                            game.name
-                        );
-                        assert_eq!(cel_color(mark).is_none(), mark == '.');
-                    }
+                    assert!(
+                        matches!(
+                            mark,
+                            '.' | '0'..='9' | 'A' | 'B' | 'r' | 'y' | 'g' | 'c' | 'b' | 'm' | 'w'
+                        ),
+                        "{}: cel {c} row {r} has unknown mark {mark:?}",
+                        game.name
+                    );
+                    assert_eq!(cel_color(mark).is_none(), mark == '.');
                 }
             }
         }
-    }
-}
-
-#[test]
-fn tile_labels_fill_the_tile() {
-    for mark in ".123456789ab".chars() {
-        let (label, _, _) = tile(mark).unwrap();
-        assert_eq!(
-            label.chars().count(),
-            TILE_W,
-            "tile {mark:?} label {label:?} is not {TILE_W} wide"
-        );
-    }
-}
-
-#[test]
-fn tile_numbers_are_centered() {
-    for mark in "123456789ab".chars() {
-        let (label, _, _) = tile(mark).unwrap();
-        let digits = label.trim().chars().count();
-        let pad = label.chars().take_while(|c| *c == ' ').count();
-
-        assert_eq!(
-            pad,
-            (TILE_W - digits) / 2,
-            "tile {mark:?} label {label:?} is not centered with the odd space on the right"
-        );
     }
 }

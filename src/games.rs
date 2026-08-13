@@ -11,7 +11,6 @@ pub const GAMES: &[Game] = &[
         id: "tetris",
         hint: "← → move · ↑ rotate · space drop",
         playable: true,
-        tiles: false,
         art: animations::tetris::ART,
     },
     Game {
@@ -20,7 +19,6 @@ pub const GAMES: &[Game] = &[
         id: "snake",
         hint: "← ↑ → ↓ steer",
         playable: false,
-        tiles: false,
         art: animations::snake::ART,
     },
     Game {
@@ -29,7 +27,6 @@ pub const GAMES: &[Game] = &[
         id: "flappy",
         hint: "space to flap",
         playable: false,
-        tiles: false,
         art: animations::flappy::ART,
     },
     Game {
@@ -38,7 +35,6 @@ pub const GAMES: &[Game] = &[
         id: "pong",
         hint: "w/s · ↑/↓ · two players",
         playable: false,
-        tiles: false,
         art: animations::pong::ART,
     },
     Game {
@@ -47,7 +43,6 @@ pub const GAMES: &[Game] = &[
         id: "2048",
         hint: "← ↑ → ↓ slide",
         playable: false,
-        tiles: true,
         art: animations::merge::ART,
     },
     Game {
@@ -56,7 +51,6 @@ pub const GAMES: &[Game] = &[
         id: "breakout",
         hint: "← → paddle",
         playable: false,
-        tiles: false,
         art: animations::breakout::ART,
     },
     Game {
@@ -65,7 +59,6 @@ pub const GAMES: &[Game] = &[
         id: "galaga",
         hint: "← → move · space fire",
         playable: false,
-        tiles: false,
         art: animations::galaga::ART,
     },
     Game {
@@ -74,7 +67,6 @@ pub const GAMES: &[Game] = &[
         id: "pacman",
         hint: "← ↑ → ↓ steer",
         playable: false,
-        tiles: false,
         art: animations::pacman::ART,
     },
     Game {
@@ -83,7 +75,6 @@ pub const GAMES: &[Game] = &[
         id: "invaders",
         hint: "← → move · space fire",
         playable: false,
-        tiles: false,
         art: animations::invaders::ART,
     },
 ];

@@ -9,6 +9,6 @@ pub mod pong;
 pub mod snake;
 pub mod tetris;
 
-pub use draw::{TILE_W, blocks, cel_at, cel_color, tile, tiles};
+pub use draw::{blocks, cel_at, cel_color};
 
 pub(crate) const EMPTY: &str = "........";
