@@ -1,6 +1,6 @@
 use std::collections::HashSet;
 
-use tetrotui::state::PieceKind;
+use tetris::state::PieceKind;
 
 const ALL: [PieceKind; 7] = [
     PieceKind::I,

@@ -2,8 +2,8 @@ use std::fs;
 
 use serde::Deserialize;
 
-const APP_DIR: &'static str = "tetrotui";
-const CONFIG_FILE: &'static str = "config.toml";
+const APP_DIR: &str = "tetrotui";
+const CONFIG_FILE: &str = "config.toml";
 
 #[derive(Deserialize, Default)]
 pub struct Config {
