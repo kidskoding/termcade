@@ -54,11 +54,15 @@ from the widest row.
 
 ### Design
 
-`art` becomes a list of animation cels:
+`art` becomes a list of animation cels. A cel's row is a list of colored segments
+rather than a single colored string, because a falling piece drawn over the settled
+stack puts two colors on one row:
 
 ```rust
 // src/game.rs
-pub type Cel = &'static [(&'static str, Color)];
+pub type Seg = (&'static str, Color);
+pub type Row = &'static [Seg];
+pub type Cel = &'static [Row];
 
 pub struct Game {
     pub name: &'static str,

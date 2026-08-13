@@ -1,9 +1,9 @@
 use ratatui::prelude::*;
 use ratatui::widgets::{Block, Clear, HighlightSpacing, List, ListItem, Paragraph, Wrap};
 
-use crate::colors::{ACCENT, CHROME, GO, LOGO_COLORS, SUBTLE, bold, chrome};
-use crate::game::Game;
-use crate::games::{self, GAMES};
+use crate::colors::{ACCENT, GO, LOGO_COLORS, SUBTLE, bold, chrome};
+use crate::game::{Cel, Game, Row};
+use crate::games::GAMES;
 use crate::menu::Menu;
 
 const LOGO: &[&str] = &[
@@ -14,15 +14,19 @@ const LOGO: &[&str] = &[
     "  █   █████ █    █ █   █ █████ █   █ ████  █████",
 ];
 
-const TAGLINE: &str =
-    "a collection of terminal arcade games to play when you are bored during that 8 am lecture";
+const TAGLINE: &str = "a redefined arcade experience for the terminal";
 
 const MIN_W: u16 = 46;
 const MIN_H: u16 = 18;
+const CEL_MS: u128 = 200;
+
+pub fn fits(area: Rect) -> bool {
+    area.width >= MIN_W && area.height >= MIN_H
+}
 
 pub fn draw(menu: &mut Menu, frame: &mut Frame) {
     let area = frame.area();
-    if area.width < MIN_W || area.height < MIN_H {
+    if !fits(area) {
         let msg = Paragraph::new(format!("needs at least {MIN_W}×{MIN_H}"))
             .style(chrome())
             .alignment(Alignment::Center);
@@ -94,83 +98,69 @@ fn draw_game_list(menu: &mut Menu, frame: &mut Frame, area: Rect) {
 }
 
 fn game_item(game: &Game) -> ListItem<'_> {
-    let built = games::available(game);
-
-    let text = if built {
-        game.name.to_string()
-    } else {
-        format!("{} (not built)", game.name)
-    };
-
-    let style = if built { Style::default() } else { chrome() };
-
-    ListItem::new(Line::styled(text, style))
+    ListItem::new(Line::raw(game.name))
 }
 
 fn draw_detail(menu: &mut Menu, frame: &mut Frame, area: Rect, blink_on: bool) {
     let game = &GAMES[menu.selected];
-    let built = games::available(game);
-    let main_color = if built { ACCENT } else { CHROME };
 
     let block = Block::bordered().border_style(chrome()).title(Span::styled(
         format!(" {} ", game.name.to_uppercase()),
-        bold(main_color),
+        bold(ACCENT),
     ));
 
     let inner = block.inner(area);
     frame.render_widget(block, area);
 
     let mut lines = vec![Line::from("")];
-    lines.extend(playfield_lines(game, built));
+    lines.extend(playfield_lines(current_cel(menu, game)));
     lines.push(Line::from(""));
-    lines.push(Line::styled(game.name.to_uppercase(), bold(main_color)));
+    lines.push(Line::styled(game.name.to_uppercase(), bold(ACCENT)));
     lines.push(Line::styled(game.blurb, Style::default().fg(SUBTLE)));
     lines.push(Line::styled(game.hint, chrome()));
     lines.push(Line::from(""));
-    lines.extend(status_lines(game, built, blink_on));
+    lines.extend(status_lines(blink_on));
 
     frame.render_widget(Paragraph::new(lines).alignment(Alignment::Center), inner);
 }
 
-fn playfield_lines(game: &Game, built: bool) -> Vec<Line<'_>> {
-    let art_w = game
-        .art
-        .iter()
-        .map(|(row, _)| row.chars().count())
-        .max()
-        .unwrap_or(0);
+fn current_cel(menu: &Menu, game: &Game) -> Cel {
+    if game.art.is_empty() {
+        return &[];
+    }
+
+    let elapsed = menu.art_started.elapsed().as_millis();
+    game.art[(elapsed / CEL_MS) as usize % game.art.len()]
+}
+
+fn playfield_lines(cel: Cel) -> Vec<Line<'static>> {
+    let art_w = cel.iter().map(row_width).max().unwrap_or(0);
 
     let mut lines = vec![Line::styled(format!("╔{}╗", "═".repeat(art_w)), chrome())];
-    for (row, color) in game.art {
-        let piece_style = if built {
-            Style::default().fg(*color)
-        } else {
-            chrome()
-        };
+    for row in cel {
+        let mut spans = vec![Span::styled("║", chrome())];
+        spans.extend(
+            row.iter()
+                .map(|(text, color)| Span::styled(*text, Style::default().fg(*color))),
+        );
+        spans.push(Span::styled("║", chrome()));
 
-        lines.push(Line::from(vec![
-            Span::styled("║", chrome()),
-            Span::styled(*row, piece_style),
-            Span::styled("║", chrome()),
-        ]));
+        lines.push(Line::from(spans));
     }
 
     lines.push(Line::styled(format!("╚{}╝", "═".repeat(art_w)), chrome()));
     lines
 }
 
-fn status_lines(game: &Game, built: bool, blink_on: bool) -> Vec<Line<'_>> {
-    if built {
-        if blink_on {
-            vec![Line::styled("▶ press enter to play", bold(GO))]
-        } else {
-            vec![]
-        }
+fn row_width(row: &Row) -> usize {
+    row.iter().map(|(text, _)| text.chars().count()).sum()
+}
+
+fn status_lines(blink_on: bool) -> Vec<Line<'static>> {
+    if blink_on {
+        vec![Line::styled("▶ press enter to play", bold(GO))]
     } else {
-        vec![
-            Line::styled("not installed", bold(Color::Red)),
-            Line::styled(format!("cargo build -p {}", game.bin), chrome()),
-        ]
+        vec![]
     }
 }
 
@@ -194,6 +184,19 @@ fn draw_error(frame: &mut Frame, body: Rect, message: &str) {
             .border_style(Style::default().fg(Color::Red)),
     );
     frame.render_widget(dialog, rect);
+}
+
+/// Shutter bars closing in from the top and bottom edges, `covered` rows deep.
+pub fn bars(frame: &mut Frame, covered: u16) {
+    let area = frame.area();
+    let covered = covered.min(area.height / 2);
+    if covered == 0 {
+        return;
+    }
+
+    for y in [area.y, area.y + area.height - covered] {
+        frame.render_widget(Clear, Rect::new(area.x, y, area.width, covered));
+    }
 }
 
 fn draw_footer(frame: &mut Frame, area: Rect) {
