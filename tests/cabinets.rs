@@ -1,5 +1,5 @@
 use termcade::games::GAMES;
-use termcade::render::cel_color;
+use termcade::render::{TILE_W, cel_color, tile};
 
 #[test]
 fn cabinet_cels_are_uniform() {
@@ -40,14 +40,49 @@ fn cabinet_art_marks_are_known() {
         for (c, cel) in game.art.iter().enumerate() {
             for (r, row) in cel.iter().enumerate() {
                 for mark in row.chars() {
-                    assert!(
-                        matches!(mark, '.' | 'r' | 'y' | 'g' | 'c' | 'b' | 'm' | 'w'),
-                        "{}: cel {c} row {r} has unknown mark {mark:?}",
-                        game.name
-                    );
-                    assert_eq!(cel_color(mark).is_none(), mark == '.');
+                    if game.tiles {
+                        assert!(
+                            tile(mark).is_some(),
+                            "{}: cel {c} row {r} has unknown tile mark {mark:?}",
+                            game.name
+                        );
+                    } else {
+                        assert!(
+                            matches!(mark, '.' | 'r' | 'y' | 'g' | 'c' | 'b' | 'm' | 'w'),
+                            "{}: cel {c} row {r} has unknown mark {mark:?}",
+                            game.name
+                        );
+                        assert_eq!(cel_color(mark).is_none(), mark == '.');
+                    }
                 }
             }
         }
+    }
+}
+
+#[test]
+fn tile_labels_fill_the_tile() {
+    for mark in ".123456789ab".chars() {
+        let (label, _, _) = tile(mark).unwrap();
+        assert_eq!(
+            label.chars().count(),
+            TILE_W,
+            "tile {mark:?} label {label:?} is not {TILE_W} wide"
+        );
+    }
+}
+
+#[test]
+fn tile_numbers_are_centered_rightward() {
+    for mark in "123456789ab".chars() {
+        let (label, _, _) = tile(mark).unwrap();
+        let digits = label.trim().chars().count();
+        let pad = label.chars().take_while(|c| *c == ' ').count();
+
+        assert_eq!(
+            pad,
+            (TILE_W - digits).div_ceil(2),
+            "tile {mark:?} label {label:?} is not centered with the odd space on the left"
+        );
     }
 }

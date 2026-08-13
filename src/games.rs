@@ -126,23 +126,53 @@ const INVADERS_ART: &[Cel] = &[
 ];
 
 const MERGE_ART: &[Cel] = &[
+    &["1..1", "2...", "....", "3..."],
+    &["11..", "2...", "....", "3..."],
+    &["2...", "2...", "....", "3..."],
+    &["2...", "2...", "...1", "3..."],
+    &["3...", "...1", "....", "3..."],
+    &["3...", "...1", "1...", "3..."],
+];
+
+const GALAGA_ART: &[Cel] = &[
     &[
-        EMPTY, "..cc..cc", "gg......", EMPTY, "..yy....", EMPTY, EMPTY,
+        "..mmmm..", "..cccc..", EMPTY, EMPTY, EMPTY, EMPTY, "...g....",
     ],
     &[
-        EMPTY, ".cc..cc.", "gg......", EMPTY, ".yy.....", EMPTY, EMPTY,
+        "..mmmm..", "..c.cc..", "....y...", EMPTY, EMPTY, EMPTY, "...g....",
     ],
     &[
-        EMPTY, "cc.cc...", "gg......", EMPTY, "yy......", EMPTY, EMPTY,
+        "..mmmm..", "..c.cc..", EMPTY, ".....y..", EMPTY, "...w....", "...g....",
     ],
     &[
-        EMPTY, "cccc....", "gg......", EMPTY, "yy......", EMPTY, EMPTY,
+        "..mmmm..", "..c.cc..", EMPTY, EMPTY, "...wy...", EMPTY, "...g....",
     ],
     &[
-        EMPTY, "ww......", "gg......", EMPTY, "yy......", EMPTY, EMPTY,
+        "..mmmm..", "..c.cc..", EMPTY, EMPTY, "...ww...", EMPTY, "...g....",
     ],
     &[
-        EMPTY, "gg......", "gg......", "......cc", "yy......", EMPTY, EMPTY,
+        "..mmmm..", "..c.cc..", EMPTY, EMPTY, EMPTY, EMPTY, "...g....",
+    ],
+];
+
+const PACMAN_ART: &[Cel] = &[
+    &[
+        EMPTY, EMPTY, "bbbbbbbb", "r.y.wwww", "bbbbbbbb", EMPTY, EMPTY,
+    ],
+    &[
+        EMPTY, EMPTY, "bbbbbbbb", ".r.y.www", "bbbbbbbb", EMPTY, EMPTY,
+    ],
+    &[
+        EMPTY, EMPTY, "bbbbbbbb", "..r.y.ww", "bbbbbbbb", EMPTY, EMPTY,
+    ],
+    &[
+        EMPTY, EMPTY, "bbbbbbbb", "...r.y.w", "bbbbbbbb", EMPTY, EMPTY,
+    ],
+    &[
+        EMPTY, EMPTY, "bbbbbbbb", "....r.y.", "bbbbbbbb", EMPTY, EMPTY,
+    ],
+    &[
+        EMPTY, EMPTY, "bbbbbbbb", "....c.y.", "bbbbbbbb", EMPTY, EMPTY,
     ],
 ];
 
@@ -153,6 +183,7 @@ pub const GAMES: &[Game] = &[
         id: "tetris",
         hint: "← → move · ↑ rotate · space drop",
         playable: true,
+        tiles: false,
         art: TETRIS_ART,
     },
     Game {
@@ -161,6 +192,7 @@ pub const GAMES: &[Game] = &[
         id: "snake",
         hint: "← ↑ → ↓ steer",
         playable: false,
+        tiles: false,
         art: SNAKE_ART,
     },
     Game {
@@ -169,6 +201,7 @@ pub const GAMES: &[Game] = &[
         id: "flappy",
         hint: "space to flap",
         playable: false,
+        tiles: false,
         art: FLAPPY_ART,
     },
     Game {
@@ -177,6 +210,7 @@ pub const GAMES: &[Game] = &[
         id: "pong",
         hint: "w/s · ↑/↓ · two players",
         playable: false,
+        tiles: false,
         art: PONG_ART,
     },
     Game {
@@ -185,6 +219,7 @@ pub const GAMES: &[Game] = &[
         id: "2048",
         hint: "← ↑ → ↓ slide",
         playable: false,
+        tiles: true,
         art: MERGE_ART,
     },
     Game {
@@ -193,7 +228,26 @@ pub const GAMES: &[Game] = &[
         id: "breakout",
         hint: "← → paddle",
         playable: false,
+        tiles: false,
         art: BREAKOUT_ART,
+    },
+    Game {
+        name: "Galaga",
+        blurb: "they break formation and dive",
+        id: "galaga",
+        hint: "← → move · space fire",
+        playable: false,
+        tiles: false,
+        art: GALAGA_ART,
+    },
+    Game {
+        name: "Pac-Man",
+        blurb: "clear the maze, outrun the ghosts",
+        id: "pacman",
+        hint: "← ↑ → ↓ steer",
+        playable: false,
+        tiles: false,
+        art: PACMAN_ART,
     },
     Game {
         name: "Invaders",
@@ -201,6 +255,7 @@ pub const GAMES: &[Game] = &[
         id: "invaders",
         hint: "← → move · space fire",
         playable: false,
+        tiles: false,
         art: INVADERS_ART,
     },
 ];

@@ -16,7 +16,7 @@ const LOGO: &[&str] = &[
 
 const TAGLINE: &str = "a redefined arcade experience for the terminal";
 
-const MIN_W: u16 = 46;
+const MIN_W: u16 = 54;
 const MIN_H: u16 = 18;
 const CEL_MS: u128 = 200;
 
@@ -116,8 +116,13 @@ fn draw_detail(menu: &mut Menu, frame: &mut Frame, area: Rect, blink_on: bool) {
     let inner = block.inner(area);
     frame.render_widget(block, area);
 
+    let cel = current_cel(menu, game);
     let mut lines = vec![Line::from("")];
-    lines.extend(playfield_lines(current_cel(menu, game)));
+    lines.extend(if game.tiles {
+        tile_lines(cel)
+    } else {
+        playfield_lines(cel)
+    });
     lines.push(Line::from(""));
     lines.push(Line::styled(game.name.to_uppercase(), bold(ACCENT)));
     lines.push(Line::styled(game.blurb, Style::default().fg(SUBTLE)));
@@ -164,6 +169,53 @@ fn playfield_lines(cel: Cel) -> Vec<Line<'static>> {
         spans.push(Span::styled("║", chrome()));
 
         lines.push(Line::from(spans));
+    }
+
+    lines.push(Line::styled(format!("╚{}╝", "═".repeat(art_w)), chrome()));
+    lines
+}
+
+pub const TILE_W: usize = 6;
+
+pub fn tile(mark: char) -> Option<(&'static str, Color, Color)> {
+    const DARK: Color = Color::Rgb(0x77, 0x6e, 0x65);
+    const LIGHT: Color = Color::Rgb(0xf9, 0xf6, 0xf2);
+
+    let (label, bg, fg) = match mark {
+        '.' => ("      ", Color::Rgb(0xcd, 0xc1, 0xb4), DARK),
+        '1' => ("   2  ", Color::Rgb(0xee, 0xe4, 0xda), DARK),
+        '2' => ("   4  ", Color::Rgb(0xed, 0xe0, 0xc8), DARK),
+        '3' => ("   8  ", Color::Rgb(0xf2, 0xb1, 0x79), LIGHT),
+        '4' => ("  16  ", Color::Rgb(0xf5, 0x95, 0x63), LIGHT),
+        '5' => ("  32  ", Color::Rgb(0xf6, 0x7c, 0x5f), LIGHT),
+        '6' => ("  64  ", Color::Rgb(0xf6, 0x5e, 0x3b), LIGHT),
+        '7' => ("  128 ", Color::Rgb(0xed, 0xcf, 0x72), LIGHT),
+        '8' => ("  256 ", Color::Rgb(0xed, 0xcc, 0x61), LIGHT),
+        '9' => ("  512 ", Color::Rgb(0xed, 0xc8, 0x50), LIGHT),
+        'a' => (" 1024 ", Color::Rgb(0xed, 0xc5, 0x3f), LIGHT),
+        'b' => (" 2048 ", Color::Rgb(0xed, 0xc2, 0x2e), LIGHT),
+        _ => return None,
+    };
+
+    Some((label, bg, fg))
+}
+
+fn tile_lines(cel: Cel) -> Vec<Line<'static>> {
+    let art_w = cel.iter().map(|row| row.chars().count()).max().unwrap_or(0) * TILE_W;
+
+    let mut lines = vec![Line::styled(format!("╔{}╗", "═".repeat(art_w)), chrome())];
+    for row in cel {
+        for numbered in [false, true, false] {
+            let mut spans = vec![Span::styled("║", chrome())];
+            spans.extend(row.chars().map(|mark| {
+                let (label, bg, fg) = tile(mark).unwrap_or(("      ", Color::Red, Color::Red));
+                let text = if numbered { label } else { "      " };
+                Span::styled(text, Style::default().fg(fg).bg(bg))
+            }));
+            spans.push(Span::styled("║", chrome()));
+
+            lines.push(Line::from(spans));
+        }
     }
 
     lines.push(Line::styled(format!("╚{}╝", "═".repeat(art_w)), chrome()));

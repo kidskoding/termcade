@@ -36,11 +36,17 @@ These constrain the work but are not themselves part of this spec's scope.
 
 ## Roster
 
-Seven cabinets, chosen so each has a distinct input verb, ordered by build cost:
+Nine cabinets, chosen so each has a distinct input verb, ordered by build cost:
 tetris (rotate and place), snake (steer and grow), flappy (one button), pong (two
 players on one keyboard, and the seed for head-to-head over SSH later), 2048
 (slide and merge), breakout (angle the bounce — half-block rendering buys sub-cell
-ball movement), invaders (march and shoot).
+ball movement), galaga (formations that break and dive), pac-man (clear a maze
+under pursuit), invaders (march and shoot).
+
+Galaga and invaders share an input verb, so galaga earns its slot on the diving
+formation attack rather than on being a second shooter — its cabinet art shows
+exactly that. Pac-man is the most expensive game on the list by a wide margin (a
+maze plus four distinct ghost personalities) and sits near the end accordingly.
 
 2048 is included on modified rules. Stock 2048 has no time pressure — the board
 only changes when the player acts — which is what makes it a puzzle rather than an
@@ -50,10 +56,15 @@ climbs, giving the same escalating-difficulty curve tetris gets from gravity;
 merges chained inside a short window build a decaying combo multiplier. Score, not
 reaching 2048, is the objective.
 
-Rejected: pac-man (a maze plus four distinct ghost AIs is its own project),
-asteroids (vector rotation reads as mush in character cells), minesweeper (a
-puzzle, and unlike 2048 there is no obvious rule change that adds arcade pressure
-without becoming a different game).
+2048 draws through a second renderer. Its marks are tile values, not blocks, so a
+cel char expands to a 6-column by 3-row tile carrying the real 2048 background
+palette with the number centered on the middle row — square in a terminal's 1:2
+cells, which a 6x1 or 4x2 tile is not. `Game.tiles` selects it. The 4x4 board is
+24 columns wide, which raised the menu's `MIN_W` from 46 to 54.
+
+Rejected: asteroids (vector rotation reads as mush in character cells),
+minesweeper (a puzzle, and unlike 2048 there is no obvious rule change that adds
+arcade pressure without becoming a different game).
 
 All six are registered now with animated art. `Game.playable` gates the ones that
 have no crate yet: they render dimmed in the list, show `COMING SOON` where the
