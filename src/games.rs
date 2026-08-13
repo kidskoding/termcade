@@ -14,13 +14,14 @@ const E: Row = &[("                ", GAP)];
 
 const NUB: Row = &[("        ", GAP), ("██", T), ("      ", GAP)];
 const BODY: Row = &[("      ", GAP), ("██████", T), ("    ", GAP)];
+const NUB_R: Row = &[("        ", GAP), ("████", T), ("    ", GAP)];
 
 const S4: Row = &[("██", J), ("              ", GAP)];
 const S5: Row = &[("████", J), ("          ", GAP), ("██", S)];
 const S6: Row = &[("██", J), ("████", I), ("      ", GAP), ("████", S)];
 
 const S4_NUB: Row = &[("██", J), ("      ", GAP), ("██", T), ("      ", GAP)];
-const S4_BODY: Row = &[("██", J), ("    ", GAP), ("██████", T), ("    ", GAP)];
+const S4_NUB_L: Row = &[("██", J), ("    ", GAP), ("████", T), ("      ", GAP)];
 const S5_NUB: Row = &[
     ("████", J),
     ("    ", GAP),
@@ -41,9 +42,9 @@ const FLASH: Row = &[("████████████████", Color:
 
 const TETRIS_ART: &[Cel] = &[
     &[NUB, BODY, E, E, S4, S5, S6],
-    &[E, NUB, BODY, E, S4, S5, S6],
-    &[E, E, NUB, BODY, S4, S5, S6],
-    &[E, E, E, NUB, S4_BODY, S5, S6],
+    &[E, NUB, NUB_R, NUB, S4, S5, S6],
+    &[E, E, BODY, NUB, S4, S5, S6],
+    &[E, E, E, NUB, S4_NUB_L, S5_NUB, S6],
     &[E, E, E, E, S4_NUB, S5_BODY, S6],
     &[E, E, E, E, S4, S5_NUB, S6_BODY],
     &[E, E, E, E, S4, S5_NUB, FLASH],
