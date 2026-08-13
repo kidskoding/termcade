@@ -73,7 +73,7 @@ fn tile_labels_fill_the_tile() {
 }
 
 #[test]
-fn tile_numbers_are_centered_rightward() {
+fn tile_numbers_are_centered() {
     for mark in "123456789ab".chars() {
         let (label, _, _) = tile(mark).unwrap();
         let digits = label.trim().chars().count();
@@ -81,8 +81,8 @@ fn tile_numbers_are_centered_rightward() {
 
         assert_eq!(
             pad,
-            (TILE_W - digits).div_ceil(2),
-            "tile {mark:?} label {label:?} is not centered with the odd space on the left"
+            (TILE_W - digits) / 2,
+            "tile {mark:?} label {label:?} is not centered with the odd space on the right"
         );
     }
 }
