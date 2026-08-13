@@ -58,11 +58,7 @@ fn draw_logo(frame: &mut Frame, area: Rect) {
         .map(|(i, row)| Line::styled(*row, bold(LOGO_COLORS[i % LOGO_COLORS.len()])))
         .collect();
 
-    frame.render_widget(
-        Paragraph::new(lines)
-            .alignment(Alignment::Center),
-        area
-    );
+    frame.render_widget(Paragraph::new(lines).alignment(Alignment::Center), area);
 }
 
 fn draw_tagline(frame: &mut Frame, area: Rect) {
