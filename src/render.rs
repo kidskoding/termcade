@@ -58,7 +58,11 @@ fn draw_logo(frame: &mut Frame, area: Rect) {
         .map(|(i, row)| Line::styled(*row, bold(LOGO_COLORS[i % LOGO_COLORS.len()])))
         .collect();
 
-    frame.render_widget(Paragraph::new(lines).alignment(Alignment::Center), area);
+    frame.render_widget(
+        Paragraph::new(lines)
+            .alignment(Alignment::Center),
+        area
+    );
 }
 
 fn draw_tagline(frame: &mut Frame, area: Rect) {
@@ -107,17 +111,16 @@ fn game_item(game: &Game) -> ListItem<'_> {
 
 fn draw_detail(menu: &mut Menu, frame: &mut Frame, area: Rect, blink_on: bool) {
     let game = &GAMES[menu.selected];
-
     let block = Block::bordered().border_style(chrome()).title(Span::styled(
         format!(" {} ", game.name.to_uppercase()),
         bold(ACCENT),
     ));
-
     let inner = block.inner(area);
     frame.render_widget(block, area);
-
     let cel = animations::cel_at(game.art, menu.art_started.elapsed());
+
     let mut lines = vec![Line::from("")];
+
     lines.extend(if game.tiles {
         animations::tiles(cel)
     } else {

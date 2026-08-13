@@ -83,8 +83,7 @@ fn read_key() -> color_eyre::Result<Option<KeyCode>> {
     }
 
     if let Event::Key(key) = event::read()?
-        && key.kind == KeyEventKind::Press
-    {
+        && key.kind == KeyEventKind::Press {
         return Ok(Some(key.code));
     }
 
