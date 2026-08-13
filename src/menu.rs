@@ -1,22 +1,11 @@
-use std::thread;
 use std::time::{Duration, Instant};
 
 use crossterm::event::{self, Event, KeyCode, KeyEventKind};
-use ratatui::layout::Rect;
 use ratatui::widgets::ListState;
 
 use crate::games::{self, GAMES};
 use crate::render;
-
-const WIPE_CLOSE: Duration = Duration::from_millis(150);
-const WIPE_OPEN: Duration = Duration::from_millis(120);
-const WIPE_STEPS: u16 = 12;
-
-#[derive(Clone, Copy)]
-enum Wipe {
-    Closing,
-    Opening,
-}
+use crate::transition::{self, Wipe};
 
 pub struct Menu {
     pub selected: usize,
@@ -61,51 +50,13 @@ impl Menu {
             return Ok(());
         }
 
-        self.wipe(terminal, Wipe::Closing)?;
+        transition::wipe(self, terminal, Wipe::Closing)?;
 
         let game = &GAMES[self.selected];
         self.error = games::launch(game, terminal).err().map(|e| e.to_string());
 
         terminal.clear()?;
-        self.wipe(terminal, Wipe::Opening)?;
-
-        Ok(())
-    }
-
-    fn wipe(
-        &mut self,
-        terminal: &mut ratatui::DefaultTerminal,
-        wipe: Wipe,
-    ) -> color_eyre::Result<()> {
-        let size = terminal.size()?;
-        if !render::fits(Rect::new(0, 0, size.width, size.height)) {
-            return Ok(());
-        }
-
-        let half = size.height / 2;
-        let steps = half.min(WIPE_STEPS);
-        if steps == 0 {
-            return Ok(());
-        }
-
-        let total = match wipe {
-            Wipe::Closing => WIPE_CLOSE,
-            Wipe::Opening => WIPE_OPEN,
-        };
-        let per_step = total / u32::from(steps);
-        for step in 0..=steps {
-            let covered = match wipe {
-                Wipe::Closing => step,
-                Wipe::Opening => steps - step,
-            };
-
-            terminal.draw(|frame| {
-                render::draw(self, frame);
-                render::bars(frame, covered * half / steps);
-            })?;
-
-            thread::sleep(per_step);
-        }
+        transition::wipe(self, terminal, Wipe::Opening)?;
 
         Ok(())
     }

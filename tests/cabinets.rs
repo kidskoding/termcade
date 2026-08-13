@@ -1,5 +1,5 @@
+use termcade::animations::{TILE_W, cel_color, tile};
 use termcade::games::GAMES;
-use termcade::render::{TILE_W, cel_color, tile};
 
 #[test]
 fn cabinet_cels_are_uniform() {

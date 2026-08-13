@@ -1,8 +1,9 @@
 use ratatui::prelude::*;
 use ratatui::widgets::{Block, Clear, HighlightSpacing, List, ListItem, Paragraph, Wrap};
 
+use crate::animations;
 use crate::colors::{ACCENT, GO, LOGO_COLORS, SUBTLE, bold, chrome};
-use crate::game::{Cel, Game};
+use crate::game::Game;
 use crate::games::GAMES;
 use crate::menu::Menu;
 
@@ -18,7 +19,6 @@ const TAGLINE: &str = "a redefined arcade experience for the terminal";
 
 const MIN_W: u16 = 54;
 const MIN_H: u16 = 18;
-const CEL_MS: u128 = 200;
 
 pub fn fits(area: Rect) -> bool {
     area.width >= MIN_W && area.height >= MIN_H
@@ -116,12 +116,12 @@ fn draw_detail(menu: &mut Menu, frame: &mut Frame, area: Rect, blink_on: bool) {
     let inner = block.inner(area);
     frame.render_widget(block, area);
 
-    let cel = current_cel(menu, game);
+    let cel = animations::cel_at(game.art, menu.art_started.elapsed());
     let mut lines = vec![Line::from("")];
     lines.extend(if game.tiles {
-        tile_lines(cel)
+        animations::tiles(cel)
     } else {
-        playfield_lines(cel)
+        animations::blocks(cel)
     });
     lines.push(Line::from(""));
     lines.push(Line::styled(game.name.to_uppercase(), bold(ACCENT)));
@@ -131,95 +131,6 @@ fn draw_detail(menu: &mut Menu, frame: &mut Frame, area: Rect, blink_on: bool) {
     lines.extend(status_lines(game, blink_on));
 
     frame.render_widget(Paragraph::new(lines).alignment(Alignment::Center), inner);
-}
-
-fn current_cel(menu: &Menu, game: &Game) -> Cel {
-    if game.art.is_empty() {
-        return &[];
-    }
-
-    let elapsed = menu.art_started.elapsed().as_millis();
-    game.art[(elapsed / CEL_MS) as usize % game.art.len()]
-}
-
-pub fn cel_color(mark: char) -> Option<Color> {
-    match mark {
-        'r' => Some(Color::Red),
-        'y' => Some(Color::Yellow),
-        'g' => Some(Color::Green),
-        'c' => Some(Color::Cyan),
-        'b' => Some(Color::Blue),
-        'm' => Some(Color::Magenta),
-        'w' => Some(Color::White),
-        '.' => None,
-        _ => Some(Color::Red),
-    }
-}
-
-fn playfield_lines(cel: Cel) -> Vec<Line<'static>> {
-    let art_w = cel.iter().map(|row| row.chars().count()).max().unwrap_or(0) * 2;
-
-    let mut lines = vec![Line::styled(format!("╔{}╗", "═".repeat(art_w)), chrome())];
-    for row in cel {
-        let mut spans = vec![Span::styled("║", chrome())];
-        spans.extend(row.chars().map(|mark| match cel_color(mark) {
-            Some(color) => Span::styled("██", Style::default().fg(color)),
-            None => Span::raw("  "),
-        }));
-        spans.push(Span::styled("║", chrome()));
-
-        lines.push(Line::from(spans));
-    }
-
-    lines.push(Line::styled(format!("╚{}╝", "═".repeat(art_w)), chrome()));
-    lines
-}
-
-pub const TILE_W: usize = 6;
-
-pub fn tile(mark: char) -> Option<(&'static str, Color, Color)> {
-    const DARK: Color = Color::Rgb(0x77, 0x6e, 0x65);
-    const LIGHT: Color = Color::Rgb(0xf9, 0xf6, 0xf2);
-
-    let (label, bg, fg) = match mark {
-        '.' => ("      ", Color::Rgb(0xcd, 0xc1, 0xb4), DARK),
-        '1' => ("  2   ", Color::Rgb(0xee, 0xe4, 0xda), DARK),
-        '2' => ("  4   ", Color::Rgb(0xed, 0xe0, 0xc8), DARK),
-        '3' => ("  8   ", Color::Rgb(0xf2, 0xb1, 0x79), LIGHT),
-        '4' => ("  16  ", Color::Rgb(0xf5, 0x95, 0x63), LIGHT),
-        '5' => ("  32  ", Color::Rgb(0xf6, 0x7c, 0x5f), LIGHT),
-        '6' => ("  64  ", Color::Rgb(0xf6, 0x5e, 0x3b), LIGHT),
-        '7' => (" 128  ", Color::Rgb(0xed, 0xcf, 0x72), LIGHT),
-        '8' => (" 256  ", Color::Rgb(0xed, 0xcc, 0x61), LIGHT),
-        '9' => (" 512  ", Color::Rgb(0xed, 0xc8, 0x50), LIGHT),
-        'a' => (" 1024 ", Color::Rgb(0xed, 0xc5, 0x3f), LIGHT),
-        'b' => (" 2048 ", Color::Rgb(0xed, 0xc2, 0x2e), LIGHT),
-        _ => return None,
-    };
-
-    Some((label, bg, fg))
-}
-
-fn tile_lines(cel: Cel) -> Vec<Line<'static>> {
-    let art_w = cel.iter().map(|row| row.chars().count()).max().unwrap_or(0) * TILE_W;
-
-    let mut lines = vec![Line::styled(format!("╔{}╗", "═".repeat(art_w)), chrome())];
-    for row in cel {
-        for numbered in [false, true, false] {
-            let mut spans = vec![Span::styled("║", chrome())];
-            spans.extend(row.chars().map(|mark| {
-                let (label, bg, fg) = tile(mark).unwrap_or(("      ", Color::Red, Color::Red));
-                let text = if numbered { label } else { "      " };
-                Span::styled(text, Style::default().fg(fg).bg(bg))
-            }));
-            spans.push(Span::styled("║", chrome()));
-
-            lines.push(Line::from(spans));
-        }
-    }
-
-    lines.push(Line::styled(format!("╚{}╝", "═".repeat(art_w)), chrome()));
-    lines
 }
 
 fn status_lines(game: &Game, blink_on: bool) -> Vec<Line<'static>> {
@@ -255,18 +166,6 @@ fn draw_error(frame: &mut Frame, body: Rect, message: &str) {
     );
 
     frame.render_widget(dialog, rect);
-}
-
-pub fn bars(frame: &mut Frame, covered: u16) {
-    let area = frame.area();
-    let covered = covered.min(area.height / 2);
-    if covered == 0 {
-        return;
-    }
-
-    for y in [area.y, area.y + area.height - covered] {
-        frame.render_widget(Clear, Rect::new(area.x, y, area.width, covered));
-    }
 }
 
 fn draw_footer(frame: &mut Frame, area: Rect) {

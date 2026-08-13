@@ -1,180 +1,8 @@
 use color_eyre::eyre::{Result, bail};
 use ratatui::{Terminal, backend::Backend};
 
-use crate::game::{Cel, Game};
-
-const EMPTY: &str = "........";
-
-const TETRIS_ART: &[Cel] = &[
-    &[
-        "....m...", "...mmm..", EMPTY, EMPTY, "b.......", "bb.....g", "bcc...gg",
-    ],
-    &[
-        EMPTY, "....m...", "....mm..", "....m...", "b.......", "bb.....g", "bcc...gg",
-    ],
-    &[
-        EMPTY, EMPTY, "...mmm..", "....m...", "b.......", "bb.....g", "bcc...gg",
-    ],
-    &[
-        EMPTY, EMPTY, EMPTY, "....m...", "b..mm...", "bb..m..g", "bcc...gg",
-    ],
-    &[
-        EMPTY, EMPTY, EMPTY, EMPTY, "b...m...", "bb.mmm.g", "bcc...gg",
-    ],
-    &[
-        EMPTY, EMPTY, EMPTY, EMPTY, "b.......", "bb..m..g", "bccmmmgg",
-    ],
-    &[
-        EMPTY, EMPTY, EMPTY, EMPTY, "b.......", "bb..m..g", "wwwwwwww",
-    ],
-    &[EMPTY, EMPTY, EMPTY, EMPTY, EMPTY, "b.......", "bb..m..g"],
-];
-
-const SNAKE_ART: &[Cel] = &[
-    &[EMPTY, EMPTY, EMPTY, ".ggg..r.", EMPTY, EMPTY, EMPTY],
-    &[EMPTY, EMPTY, EMPTY, "..ggg.r.", EMPTY, EMPTY, EMPTY],
-    &[EMPTY, EMPTY, EMPTY, "...gggr.", EMPTY, EMPTY, EMPTY],
-    &[EMPTY, EMPTY, EMPTY, "....ggg.", EMPTY, EMPTY, EMPTY],
-    &[EMPTY, "..r.....", EMPTY, "...gggg.", EMPTY, EMPTY, EMPTY],
-    &[
-        EMPTY, "..r.....", "......g.", "...ggg..", EMPTY, EMPTY, EMPTY,
-    ],
-];
-
-const FLAPPY_ART: &[Cel] = &[
-    &[
-        "......g.", "......g.", "......g.", EMPTY, "..y...g.", "......g.", "......g.",
-    ],
-    &[
-        ".....g..", ".....g..", ".....g..", "..y.....", ".....g..", ".....g..", ".....g..",
-    ],
-    &[
-        "....g...", "....g...", "..y.g...", EMPTY, "....g...", "....g...", "....g...",
-    ],
-    &[
-        "...g....", "...g....", "...g....", "..y.....", "...g....", "...g....", "...g....",
-    ],
-    &[
-        "..g.....", "..g.....", "..g.....", "..y.....", "..g.....", "..g.....", "..g.....",
-    ],
-    &[
-        ".g......", ".g......", ".g......", "..y.....", ".g......", ".g......", ".g......",
-    ],
-];
-
-const PONG_ART: &[Cel] = &[
-    &[
-        EMPTY, EMPTY, "c......c", "c.w....c", "c......c", EMPTY, EMPTY,
-    ],
-    &[
-        EMPTY, EMPTY, "c..w...c", "c......c", "c......c", EMPTY, EMPTY,
-    ],
-    &[
-        EMPTY, "....w...", "c......c", "c......c", "c......c", EMPTY, EMPTY,
-    ],
-    &[
-        EMPTY, EMPTY, "c....w.c", "c......c", "c......c", EMPTY, EMPTY,
-    ],
-    &[
-        EMPTY, EMPTY, "c.......", "c.....wc", "c......c", ".......c", EMPTY,
-    ],
-    &[
-        EMPTY, EMPTY, "c.......", "c......c", "c....w.c", ".......c", EMPTY,
-    ],
-];
-
-const BREAKOUT_ART: &[Cel] = &[
-    &[
-        "rrrrrrrr", "yyyyyyyy", EMPTY, EMPTY, EMPTY, "....w...", "...cc...",
-    ],
-    &[
-        "rrrrrrrr", "yyyyyyyy", EMPTY, EMPTY, "...w....", EMPTY, "...cc...",
-    ],
-    &[
-        "rrrrrrrr", "yyyyyyyy", EMPTY, "..w.....", EMPTY, EMPTY, "...cc...",
-    ],
-    &[
-        "rrrrrrrr", "yyyyyyyy", ".w......", EMPTY, EMPTY, EMPTY, "...cc...",
-    ],
-    &[
-        "rrrrrrrr", "y.yyyyyy", EMPTY, "..w.....", EMPTY, EMPTY, "...cc...",
-    ],
-    &[
-        "rrrrrrrr", "y.yyyyyy", EMPTY, EMPTY, "...w....", EMPTY, "....cc..",
-    ],
-];
-
-const INVADERS_ART: &[Cel] = &[
-    &[
-        "..mmmm..", "..cccc..", EMPTY, EMPTY, EMPTY, EMPTY, "...g....",
-    ],
-    &[
-        "..mmmm..", "..cccc..", EMPTY, EMPTY, EMPTY, "...w....", "...g....",
-    ],
-    &[
-        "...mmmm.", "...cccc.", EMPTY, EMPTY, "...w....", EMPTY, "...g....",
-    ],
-    &[
-        "...mmmm.", "...cccc.", EMPTY, "...w....", EMPTY, EMPTY, "...g....",
-    ],
-    &[
-        "...mmmm.", "...cccc.", "...w....", EMPTY, EMPTY, EMPTY, "...g....",
-    ],
-    &[
-        "...mmmm.", "...wccc.", EMPTY, EMPTY, EMPTY, EMPTY, "...g....",
-    ],
-];
-
-const MERGE_ART: &[Cel] = &[
-    &["1..1", "2...", "....", "3..."],
-    &["11..", "2...", "....", "3..."],
-    &["2...", "2...", "....", "3..."],
-    &["2...", "2...", "...1", "3..."],
-    &["3...", "...1", "....", "3..."],
-    &["3...", "...1", "1...", "3..."],
-];
-
-const GALAGA_ART: &[Cel] = &[
-    &[
-        "..mmmm..", "..cccc..", EMPTY, EMPTY, EMPTY, EMPTY, "...g....",
-    ],
-    &[
-        "..mmmm..", "..c.cc..", "....y...", EMPTY, EMPTY, EMPTY, "...g....",
-    ],
-    &[
-        "..mmmm..", "..c.cc..", EMPTY, ".....y..", EMPTY, "...w....", "...g....",
-    ],
-    &[
-        "..mmmm..", "..c.cc..", EMPTY, EMPTY, "...wy...", EMPTY, "...g....",
-    ],
-    &[
-        "..mmmm..", "..c.cc..", EMPTY, EMPTY, "...ww...", EMPTY, "...g....",
-    ],
-    &[
-        "..mmmm..", "..c.cc..", EMPTY, EMPTY, EMPTY, EMPTY, "...g....",
-    ],
-];
-
-const PACMAN_ART: &[Cel] = &[
-    &[
-        EMPTY, EMPTY, "bbbbbbbb", "r.y.wwww", "bbbbbbbb", EMPTY, EMPTY,
-    ],
-    &[
-        EMPTY, EMPTY, "bbbbbbbb", ".r.y.www", "bbbbbbbb", EMPTY, EMPTY,
-    ],
-    &[
-        EMPTY, EMPTY, "bbbbbbbb", "..r.y.ww", "bbbbbbbb", EMPTY, EMPTY,
-    ],
-    &[
-        EMPTY, EMPTY, "bbbbbbbb", "...r.y.w", "bbbbbbbb", EMPTY, EMPTY,
-    ],
-    &[
-        EMPTY, EMPTY, "bbbbbbbb", "....r.y.", "bbbbbbbb", EMPTY, EMPTY,
-    ],
-    &[
-        EMPTY, EMPTY, "bbbbbbbb", "....c.y.", "bbbbbbbb", EMPTY, EMPTY,
-    ],
-];
+use crate::animations;
+use crate::game::Game;
 
 pub const GAMES: &[Game] = &[
     Game {
@@ -184,7 +12,7 @@ pub const GAMES: &[Game] = &[
         hint: "← → move · ↑ rotate · space drop",
         playable: true,
         tiles: false,
-        art: TETRIS_ART,
+        art: animations::tetris::ART,
     },
     Game {
         name: "Snake",
@@ -193,7 +21,7 @@ pub const GAMES: &[Game] = &[
         hint: "← ↑ → ↓ steer",
         playable: false,
         tiles: false,
-        art: SNAKE_ART,
+        art: animations::snake::ART,
     },
     Game {
         name: "Flappy",
@@ -202,7 +30,7 @@ pub const GAMES: &[Game] = &[
         hint: "space to flap",
         playable: false,
         tiles: false,
-        art: FLAPPY_ART,
+        art: animations::flappy::ART,
     },
     Game {
         name: "Pong",
@@ -211,7 +39,7 @@ pub const GAMES: &[Game] = &[
         hint: "w/s · ↑/↓ · two players",
         playable: false,
         tiles: false,
-        art: PONG_ART,
+        art: animations::pong::ART,
     },
     Game {
         name: "2048",
@@ -220,7 +48,7 @@ pub const GAMES: &[Game] = &[
         hint: "← ↑ → ↓ slide",
         playable: false,
         tiles: true,
-        art: MERGE_ART,
+        art: animations::merge::ART,
     },
     Game {
         name: "Breakout",
@@ -229,7 +57,7 @@ pub const GAMES: &[Game] = &[
         hint: "← → paddle",
         playable: false,
         tiles: false,
-        art: BREAKOUT_ART,
+        art: animations::breakout::ART,
     },
     Game {
         name: "Galaga",
@@ -238,7 +66,7 @@ pub const GAMES: &[Game] = &[
         hint: "← → move · space fire",
         playable: false,
         tiles: false,
-        art: GALAGA_ART,
+        art: animations::galaga::ART,
     },
     Game {
         name: "Pac-Man",
@@ -247,7 +75,7 @@ pub const GAMES: &[Game] = &[
         hint: "← ↑ → ↓ steer",
         playable: false,
         tiles: false,
-        art: PACMAN_ART,
+        art: animations::pacman::ART,
     },
     Game {
         name: "Invaders",
@@ -256,7 +84,7 @@ pub const GAMES: &[Game] = &[
         hint: "← → move · space fire",
         playable: false,
         tiles: false,
-        art: INVADERS_ART,
+        art: animations::invaders::ART,
     },
 ];
 
