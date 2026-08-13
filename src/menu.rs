@@ -57,6 +57,10 @@ impl Menu {
         &mut self,
         terminal: &mut ratatui::DefaultTerminal,
     ) -> color_eyre::Result<()> {
+        if !GAMES[self.selected].playable {
+            return Ok(());
+        }
+
         self.wipe(terminal, Wipe::Closing)?;
 
         let game = &GAMES[self.selected];
@@ -89,7 +93,6 @@ impl Menu {
             Wipe::Opening => WIPE_OPEN,
         };
         let per_step = total / u32::from(steps);
-
         for step in 0..=steps {
             let covered = match wipe {
                 Wipe::Closing => step,

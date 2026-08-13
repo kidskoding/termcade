@@ -2,7 +2,7 @@ use ratatui::prelude::*;
 use ratatui::widgets::{Block, Clear, HighlightSpacing, List, ListItem, Paragraph, Wrap};
 
 use crate::colors::{ACCENT, GO, LOGO_COLORS, SUBTLE, bold, chrome};
-use crate::game::{Cel, Game, Row};
+use crate::game::{Cel, Game};
 use crate::games::GAMES;
 use crate::menu::Menu;
 
@@ -98,7 +98,11 @@ fn draw_game_list(menu: &mut Menu, frame: &mut Frame, area: Rect) {
 }
 
 fn game_item(game: &Game) -> ListItem<'_> {
-    ListItem::new(Line::raw(game.name))
+    if game.playable {
+        ListItem::new(Line::raw(game.name))
+    } else {
+        ListItem::new(Line::styled(game.name, chrome()))
+    }
 }
 
 fn draw_detail(menu: &mut Menu, frame: &mut Frame, area: Rect, blink_on: bool) {
@@ -119,7 +123,7 @@ fn draw_detail(menu: &mut Menu, frame: &mut Frame, area: Rect, blink_on: bool) {
     lines.push(Line::styled(game.blurb, Style::default().fg(SUBTLE)));
     lines.push(Line::styled(game.hint, chrome()));
     lines.push(Line::from(""));
-    lines.extend(status_lines(blink_on));
+    lines.extend(status_lines(game, blink_on));
 
     frame.render_widget(Paragraph::new(lines).alignment(Alignment::Center), inner);
 }
@@ -133,16 +137,30 @@ fn current_cel(menu: &Menu, game: &Game) -> Cel {
     game.art[(elapsed / CEL_MS) as usize % game.art.len()]
 }
 
+pub fn cel_color(mark: char) -> Option<Color> {
+    match mark {
+        'r' => Some(Color::Red),
+        'y' => Some(Color::Yellow),
+        'g' => Some(Color::Green),
+        'c' => Some(Color::Cyan),
+        'b' => Some(Color::Blue),
+        'm' => Some(Color::Magenta),
+        'w' => Some(Color::White),
+        '.' => None,
+        _ => Some(Color::Red),
+    }
+}
+
 fn playfield_lines(cel: Cel) -> Vec<Line<'static>> {
-    let art_w = cel.iter().map(row_width).max().unwrap_or(0);
+    let art_w = cel.iter().map(|row| row.chars().count()).max().unwrap_or(0) * 2;
 
     let mut lines = vec![Line::styled(format!("╔{}╗", "═".repeat(art_w)), chrome())];
     for row in cel {
         let mut spans = vec![Span::styled("║", chrome())];
-        spans.extend(
-            row.iter()
-                .map(|(text, color)| Span::styled(*text, Style::default().fg(*color))),
-        );
+        spans.extend(row.chars().map(|mark| match cel_color(mark) {
+            Some(color) => Span::styled("██", Style::default().fg(color)),
+            None => Span::raw("  "),
+        }));
         spans.push(Span::styled("║", chrome()));
 
         lines.push(Line::from(spans));
@@ -152,11 +170,11 @@ fn playfield_lines(cel: Cel) -> Vec<Line<'static>> {
     lines
 }
 
-fn row_width(row: &Row) -> usize {
-    row.iter().map(|(text, _)| text.chars().count()).sum()
-}
+fn status_lines(game: &Game, blink_on: bool) -> Vec<Line<'static>> {
+    if !game.playable {
+        return vec![Line::styled("COMING SOON", chrome())];
+    }
 
-fn status_lines(blink_on: bool) -> Vec<Line<'static>> {
     if blink_on {
         vec![Line::styled("▶ press enter to play", bold(GO))]
     } else {
@@ -183,6 +201,7 @@ fn draw_error(frame: &mut Frame, body: Rect, message: &str) {
             .title(Span::styled(" ERROR ", bold(Color::Red)))
             .border_style(Style::default().fg(Color::Red)),
     );
+
     frame.render_widget(dialog, rect);
 }
 

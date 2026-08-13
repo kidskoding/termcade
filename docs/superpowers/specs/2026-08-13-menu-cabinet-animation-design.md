@@ -34,6 +34,22 @@ These constrain the work but are not themselves part of this spec's scope.
   capping.
 - **Rejected outright**: insert-coin/credits, CRT scanline shading, per-game config screens.
 
+## Roster
+
+Six cabinets, chosen so each has a distinct input verb, ordered by build cost:
+tetris (rotate and place), snake (steer and grow), flappy (one button), pong (two
+players on one keyboard, and the seed for head-to-head over SSH later), breakout
+(angle the bounce — half-block rendering buys sub-cell ball movement), invaders
+(march and shoot).
+
+Rejected: pac-man (a maze plus four distinct ghost AIs is its own project),
+asteroids (vector rotation reads as mush in character cells), 2048 and minesweeper
+(puzzles, no timer pressure, so not arcade).
+
+All six are registered now with animated art. `Game.playable` gates the ones that
+have no crate yet: they render dimmed in the list, show `COMING SOON` where the
+prompt goes, and ignore enter.
+
 ## Scope
 
 Two features, in this order:
@@ -54,15 +70,14 @@ from the widest row.
 
 ### Design
 
-`art` becomes a list of animation cels. A cel's row is a list of colored segments
-rather than a single colored string, because a falling piece drawn over the settled
-stack puts two colors on one row:
+`art` becomes a list of animation cels. A cel is a character mask, one char per
+playfield cell, decoded to a color by `render::cel_color` — `.` is empty and each
+letter is a piece color. Colored-segment lists were the first attempt and became
+unreadable at six cabinets; masks are editable by hand and diff cleanly.
 
 ```rust
 // src/game.rs
-pub type Seg = (&'static str, Color);
-pub type Row = &'static [Seg];
-pub type Cel = &'static [Row];
+pub type Cel = &'static [&'static str];
 
 pub struct Game {
     pub name: &'static str,
