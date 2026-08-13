@@ -125,6 +125,27 @@ const INVADERS_ART: &[Cel] = &[
     ],
 ];
 
+const MERGE_ART: &[Cel] = &[
+    &[
+        EMPTY, "..cc..cc", "gg......", EMPTY, "..yy....", EMPTY, EMPTY,
+    ],
+    &[
+        EMPTY, ".cc..cc.", "gg......", EMPTY, ".yy.....", EMPTY, EMPTY,
+    ],
+    &[
+        EMPTY, "cc.cc...", "gg......", EMPTY, "yy......", EMPTY, EMPTY,
+    ],
+    &[
+        EMPTY, "cccc....", "gg......", EMPTY, "yy......", EMPTY, EMPTY,
+    ],
+    &[
+        EMPTY, "ww......", "gg......", EMPTY, "yy......", EMPTY, EMPTY,
+    ],
+    &[
+        EMPTY, "gg......", "gg......", "......cc", "yy......", EMPTY, EMPTY,
+    ],
+];
+
 pub const GAMES: &[Game] = &[
     Game {
         name: "Tetris",
@@ -157,6 +178,14 @@ pub const GAMES: &[Game] = &[
         hint: "w/s · ↑/↓ · two players",
         playable: false,
         art: PONG_ART,
+    },
+    Game {
+        name: "2048",
+        blurb: "merge fast, the tiles keep coming",
+        id: "2048",
+        hint: "← ↑ → ↓ slide",
+        playable: false,
+        art: MERGE_ART,
     },
     Game {
         name: "Breakout",

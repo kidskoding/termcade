@@ -36,15 +36,24 @@ These constrain the work but are not themselves part of this spec's scope.
 
 ## Roster
 
-Six cabinets, chosen so each has a distinct input verb, ordered by build cost:
+Seven cabinets, chosen so each has a distinct input verb, ordered by build cost:
 tetris (rotate and place), snake (steer and grow), flappy (one button), pong (two
-players on one keyboard, and the seed for head-to-head over SSH later), breakout
-(angle the bounce — half-block rendering buys sub-cell ball movement), invaders
-(march and shoot).
+players on one keyboard, and the seed for head-to-head over SSH later), 2048
+(slide and merge), breakout (angle the bounce — half-block rendering buys sub-cell
+ball movement), invaders (march and shoot).
+
+2048 is included on modified rules. Stock 2048 has no time pressure — the board
+only changes when the player acts — which is what makes it a puzzle rather than an
+arcade game. The arcade version spawns tiles on a timer instead of per move, so
+the game plays against the player; the spawn interval tightens as the highest tile
+climbs, giving the same escalating-difficulty curve tetris gets from gravity;
+merges chained inside a short window build a decaying combo multiplier. Score, not
+reaching 2048, is the objective.
 
 Rejected: pac-man (a maze plus four distinct ghost AIs is its own project),
-asteroids (vector rotation reads as mush in character cells), 2048 and minesweeper
-(puzzles, no timer pressure, so not arcade).
+asteroids (vector rotation reads as mush in character cells), minesweeper (a
+puzzle, and unlike 2048 there is no obvious rule change that adds arcade pressure
+without becoming a different game).
 
 All six are registered now with animated art. `Game.playable` gates the ones that
 have no crate yet: they render dimmed in the list, show `COMING SOON` where the
