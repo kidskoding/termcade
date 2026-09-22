@@ -1,9 +1,9 @@
 use ratatui::{
     Frame,
     layout::{Alignment, Rect},
-    style::{Color, Style},
+    style::{Color, Modifier, Style},
     text::{Line, Span},
-    widgets::{Paragraph, Wrap},
+    widgets::{Block, Clear, Paragraph, Wrap},
 };
 
 use crate::state::{GameState, HEIGHT, HIDDEN_HEIGHT, PieceKind, VISIBLE_HEIGHT, WIDTH};
@@ -25,14 +25,27 @@ pub fn draw(state: &GameState, frame: &mut Frame) {
         return;
     }
 
+    let blocks = state.active.blocks();
+    let ghost = state.board.landing(&state.active).blocks();
+    let active = get_color(state.active.kind);
+
     let mut vec_outer: Vec<Line> = vec![];
     for r in HIDDEN_HEIGHT..HEIGHT {
         let mut vec_inner: Vec<Span> = vec![];
         for c in 0..WIDTH {
-            let cell = state.board.cells[r][c];
-            let span = match cell {
-                Some(kind) => Span::styled("██", Style::default().fg(get_color(kind))),
-                None => Span::raw("  "),
+            let at = (r as i32, c as i32);
+
+            let span = if let Some(kind) = state.board.cells[r][c] {
+                Span::styled("██", Style::default().fg(get_color(kind)))
+            } else if blocks.contains(&at) {
+                Span::styled("██", Style::default().fg(active))
+            } else if ghost.contains(&at) {
+                Span::styled(
+                    "░░",
+                    Style::default().fg(active).add_modifier(Modifier::DIM),
+                )
+            } else {
+                Span::raw("  ")
             };
 
             vec_inner.push(span);
@@ -40,14 +53,28 @@ pub fn draw(state: &GameState, frame: &mut Frame) {
         vec_outer.push(Line::from(vec_inner))
     }
 
+    let width = WIDTH as u16 * 2 + 2;
+    let height = VISIBLE_HEIGHT as u16 + 2;
     let rect = Rect::new(
-        area.x + (area.width - WIDTH as u16 * 2) / 2,
-        area.y + (area.height - VISIBLE_HEIGHT as u16) / 2,
-        WIDTH as u16 * 2,
-        VISIBLE_HEIGHT as u16,
+        area.x + (area.width - width) / 2,
+        area.y + (area.height - height) / 2,
+        width,
+        height,
     );
 
-    frame.render_widget(Paragraph::new(vec_outer), rect);
+    let block = Block::bordered().border_style(Style::default().fg(Color::DarkGray));
+    frame.render_widget(Paragraph::new(vec_outer).block(block), rect);
+
+    if state.game_over {
+        let banner = Rect::new(rect.x + 1, rect.y + height / 2 - 1, width - 2, 3);
+        frame.render_widget(Clear, banner);
+        frame.render_widget(
+            Paragraph::new("GAME OVER")
+                .alignment(Alignment::Center)
+                .block(Block::bordered().border_style(Style::default().fg(Color::Red))),
+            banner,
+        );
+    }
 }
 
 pub fn get_color(kind: PieceKind) -> Color {

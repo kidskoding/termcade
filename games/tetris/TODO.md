@@ -39,6 +39,10 @@ Tune input-feel in `--release` only (debug frame times lie).
 - [ ] Lock on landing → merge into grid.
 - [ ] Line clear detection + row collapse.
 - [ ] Game over (spawn blocked).
+- [ ] Score + lines + level in state. 100/300/500/800 per 1/2/3/4 lines, times level.
+  `clear_lines` already returns the count. **No HUD yet** — the layout lands in Phase 5
+  with the next-piece box, and `MIN_WIDTH` goes 24 → ~44 when it does. High score is the
+  cabinet's job, not tetris's.
 - [ ] Resize handling: recompute layout + redraw; below min size → "needs 24×30" message.
 
 ---
@@ -68,7 +72,7 @@ Tune input-feel in `--release` only (debug frame times lie).
 ## Phase 5 — 7-bag randomizer
 
 - [ ] Shuffle each permutation of the seven pieces. NOT uniform random.
-- [ ] Next-queue preview in HUD.
+- [ ] Next-piece preview in HUD. **One piece, not a three-deep queue.**
 
 ---
 
